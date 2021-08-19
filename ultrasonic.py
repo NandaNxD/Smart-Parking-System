@@ -4,16 +4,8 @@ import time
  
 #GPIO Mode (BOARD / BCM)
 GPIO.setmode(GPIO.BCM)
-
-#set GPIO Pins
-GPIO_TRIGGER = 23
-GPIO_ECHO = 24
  
-#set GPIO direction (IN / OUT)
-GPIO.setup(GPIO_TRIGGER, GPIO.OUT)
-GPIO.setup(GPIO_ECHO, GPIO.IN)
- 
-def distance():
+def distance(GPIO_TRIGGER,GPIO_ECHO):
     # set Trigger to HIGH
     GPIO.output(GPIO_TRIGGER, True)
  
@@ -23,11 +15,10 @@ def distance():
  
     StartTime = time.time()
     StopTime = time.time()
- 
+    
     # save StartTime
     while GPIO.input(GPIO_ECHO) == 0:
         StartTime = time.time()
- 
     # save time of arrival
     while GPIO.input(GPIO_ECHO) == 1:
         StopTime = time.time()
@@ -37,14 +28,40 @@ def distance():
     # multiply with the sonic speed (34300 cm/s)
     # and divide by 2, because there and back
     distance = (TimeElapsed * 34300) / 2
- 
     return distance
 
+
 if __name__ == '__main__':
+    #set GPIO Pins
+    GPIO_TRIGGER1 = 22
+    GPIO_ECHO1 = 4
+    GPIO_TRIGGER2 = 20
+    GPIO_ECHO2 = 23
+    RED_LED=12
+
+    #set GPIO direction (IN / OUT)
+    GPIO.setup(GPIO_TRIGGER1, GPIO.OUT)
+    GPIO.setup(GPIO_ECHO1, GPIO.IN)
+    GPIO.setup(GPIO_TRIGGER2, GPIO.OUT)
+    GPIO.setup(GPIO_ECHO2, GPIO.IN)
+    GPIO.setup(RED_LED,GPIO.OUT)
+    
     try:
         while True:
-            dist = distance()
-            print ("Measured Distance = %.1f cm" % dist)
+            dist1=100
+            dist2=200
+            
+            dist1 = distance(GPIO_TRIGGER1,GPIO_ECHO1)
+            time.sleep(0.1)
+            dist2= distance(GPIO_TRIGGER2,GPIO_ECHO2)
+            
+            if(dist1<30 and dist2<30):
+                GPIO.output(RED_LED,True)
+            else:
+                GPIO.output(RED_LED,False)
+                
+            print ("Measured Distance = %.2f cm" % dist1)
+            print("Measured Distance= %.2f cm" %dist2)
             time.sleep(1)
  
         # Reset by pressing CTRL + C
